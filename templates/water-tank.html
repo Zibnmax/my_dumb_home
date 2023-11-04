@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <title>ESP8266 Water Tank Status</title>
+</head>
+<body>
+    <h1>ESP8266 Water Tank Status</h1>
+    <p><strong>Name:</strong> {{ name }}</p>
+    <p><strong>IP Address:</strong> {{ ip }}</p>
+    <p><strong>Wi-Fi Connections Count:</strong> {{ wifi_connections_count }}</p>
+    <p><strong>Temperature:</strong> {{ temp }}</p>
+    <p><strong>Float Low:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if float_low %}checked{% endif %}>
+      <span class="slider {% if float_low %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Float High:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if float_high %}checked{% endif %}>
+      <span class="slider {% if float_high %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Pump State:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if pump_state %}checked{% endif %}>
+      <span class="slider {% if pump_state %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Heater State:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if heater_state %}checked{% endif %}>
+      <span class="slider {% if heater_state %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+
+    <button id="toggleSpoilerButton">Show More</button>
+
+    <div class="spoiler-content" id="spoiler" style="display: none;">
+        <!-- Additional data here -->
+        <p><strong>Low Temperature:</strong> {{ low_temp }}</p>
+        <p><strong>High Temperature:</strong> {{ high_temp }}</p>
+        <p><strong>Temperature Sensor Status:</strong> {{ is_temp_sensor_ok }}</p>
+        <p><strong>Pump Availability:</strong>
+        <label class="switch">
+            <input type="checkbox" {% if is_pump_available %}checked{% endif %}>
+            <span class="slider {% if is_pump_available %}green{% else %}red{% endif %}"></span>
+        </label>
+        </p>
+        <p><strong>Heater Availability:</strong>
+        <label class="switch">
+            <input type="checkbox" {% if is_heater_available %}checked{% endif %}>
+            <span class="slider {% if is_heater_available %}green{% else %}red{% endif %}"></span>
+        </label>
+        </p>
+    </div>
+
+    <script>
+        const toggleButton = document.getElementById("toggleSpoilerButton");
+        const spoiler = document.getElementById("spoiler");
+
+        toggleButton.addEventListener("click", function () {
+            if (spoiler.style.display === "none" || spoiler.style.display === "") {
+                spoiler.style.display = "block";
+                toggleButton.textContent = "Show Less";
+            } else {
+                spoiler.style.display = "none";
+                toggleButton.textContent = "Show More";
+            }
+        });
+
+        // После скрытия спойлера, вызовите функцию showAlertIfTrue
+        showAlertIfTrue({ is_force_fill_tank_ready }, 'Force Fill Tank Ready');
+        showAlertIfTrue({ is_force_heat_water_ready }, 'Force Heat Water Ready');
+        showAlertIfTrue({ is_shower_ready }, 'Shower Ready');
+        
+        // Функция для показа всплывающих окон, если значение true
+        function showAlertIfTrue(value, message) {
+            if (value) {
+                alert(message);
+            }
+        }
+    </script>
+</body>
+</html>
