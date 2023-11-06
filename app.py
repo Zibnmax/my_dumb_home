@@ -39,13 +39,13 @@ async def get_water_tank_readings(request):
             }
             return aiohttp_jinja2.render_template("water-tank.html", request, context)
 
-async def on_start(app):
-    await aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader("templates"))
 
-if __name__ == "__main__":
+def start_server():
     app = web.Application()
     app.add_routes(routes)
     app.router.add_static('/static/', path='static', name='static')
-    # app.on_startup.append(on_start)
     aiohttp_jinja2.setup(app=app, loader=jinja2.FileSystemLoader("templates"))
     web.run_app(app, port=80)
+
+if __name__ == "__main__":
+    start_server()
