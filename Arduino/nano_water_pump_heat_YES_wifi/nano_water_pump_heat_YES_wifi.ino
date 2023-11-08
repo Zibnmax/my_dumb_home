@@ -14,15 +14,12 @@ MicroDS18B20<thermo_pin> sensor;
 
 // set some variables
 int temp;
-int low_temp = 36;
-int high_temp = 41;
+int low_temp = 37;
+int high_temp = 40;
 
 boolean is_pump_available = true;
 boolean is_heater_available = true;
 boolean is_temp_sensor_ok = false;
-
-boolean is_fill_tank_in_progress = false;
-boolean is_heat_water_in_progress = false;
 
 boolean is_force_fill_tank_ready = false;
 boolean is_force_heat_water_ready = false;
@@ -71,7 +68,7 @@ boolean is_time_to_fill() {
 
 void fill_tank() {
   digitalWrite(heater_pin, LOW);  // turn heater off just in case
-  while (!float_high && !is_pump_available) {
+  while (!float_high && is_pump_available) {
     read_sensors();
     digitalWrite(pump_pin, HIGH);  // keep pump running
     send_data();
@@ -82,7 +79,8 @@ void fill_tank() {
 }
 
 void heat_water(int target_temp = high_temp) {
-  while (temp < target_temp && is_heater_available) {
+  while (temp < target_temp && is_heater_available && is_temp_sensor_ok) {
+    digitalWrite(heater_pin, HIGH);  // turn heater on
     read_sensors();
     send_data();
     receive_data();
@@ -90,7 +88,6 @@ void heat_water(int target_temp = high_temp) {
       digitalWrite(heater_pin, LOW);  // turn heater off if water level LOW
       return;                         // break heating ???
     }
-    digitalWrite(heater_pin, HIGH);  // turn heater on
   }
   digitalWrite(heater_pin, LOW);  // turn heater off
 }
@@ -176,7 +173,6 @@ void receive_data() {
 }
 
 void loop() {
-
   // reading all sensors
   read_sensors();
   send_data();

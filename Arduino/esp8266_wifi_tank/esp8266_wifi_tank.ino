@@ -101,18 +101,38 @@ void handle_http_post() {
 }
 
 void handle_serial_receive() {
+  
   String json_string;
   deserializeJson(data_for_reseive_serial, Serial);
   data_for_reseive_serial["name"] = self_name;
   data_for_reseive_serial["ip"] = local_ip;
-  data_for_send_http["wifi_connections_count"] = wifi_connections_count;
-  serializeJson(data_for_reseive_serial, json_string);
+  data_for_reseive_serial["wifi_connections_count"] = wifi_connections_count;
+
+  float_low = data_for_reseive_serial["float_low"];
+  float_high = data_for_reseive_serial["float_high"];
+  is_temp_sensor_ok = data_for_reseive_serial["is_temp_sensor_ok"];
+  is_pump_available = data_for_reseive_serial["is_pump_available"];
+  is_heater_available = data_for_reseive_serial["is_heater_available"];
+  pump_state = data_for_reseive_serial["pump_state"];
+  heater_state = data_for_reseive_serial["heater_state"];
+  low_temp = data_for_reseive_serial["low_temp"];
+  high_temp = data_for_reseive_serial["high_temp"];
+  temp = data_for_reseive_serial["temp"];
 
   httpc.begin(wifi_client, server_address);
   httpc.addHeader("Content-Type", "application/json");
-  while (httpc.POST(json_string) != 200) {
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(50);
+  if (data_for_reseive_serial.containsKey("is_force_fill_tank_ready")  ||
+      data_for_reseive_serial.containsKey("is_force_heat_water_ready") ||
+      data_for_reseive_serial.containsKey("is_shower_ready")) {
+    serializeJson(data_for_reseive_serial, json_string);
+    while (httpc.POST(json_string) != 200) {
+      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+      delay(50);
+    }
+  } else {
+    digitalWrite(LED_BUILTIN, LOW);
+    serializeJson(data_for_reseive_serial, json_string);
+    httpc.POST(json_string);
   }
   httpc.end();
   digitalWrite(LED_BUILTIN, HIGH);
