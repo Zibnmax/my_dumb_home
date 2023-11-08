@@ -97,7 +97,8 @@ void handle_http_get() {
 }
 
 void handle_http_post() {
-  Serial.println(httpc.getString());
+  Serial.println(web_server.arg("plain"));
+  web_server.send(200);
 }
 
 void handle_serial_receive() {
