@@ -83,7 +83,7 @@ void heat_water(int target_temp = high_temp) {
     digitalWrite(heater_pin, HIGH);  // turn heater on
     read_sensors();
     send_data();
-    receive_data();
+    if (receive_data()) break;
     if (is_time_to_fill()) {
       digitalWrite(heater_pin, LOW);  // turn heater off if water level LOW
       return;                         // break heating ???
@@ -146,7 +146,7 @@ void send_data() {
   }
 }
 
-void receive_data() {
+boolean receive_data() {
   if (Serial.available()) {
     deserializeJson(data_for_reseive, Serial);
     low_temp = data_for_reseive.containsKey("low_temp") ? data_for_reseive["low_temp"] : low_temp;
@@ -157,19 +157,20 @@ void receive_data() {
     if (data_for_reseive.containsKey("force_fill_tank")) {
       fill_tank();
       is_force_fill_tank_ready = true;
-      return;
+      return true;
     }
     if (data_for_reseive.containsKey("force_heat_water")) {
-      heat_water(data_for_reseive["force_heat_water"]);
+      heat_water(data_for_reseive["force_heat_water"].as<int>());
       is_force_heat_water_ready = true;
-      return;
+      return true;
     }
     if (data_for_reseive.containsKey("shower")) {
-      shower(data_for_reseive["shower"]);
+      shower(data_for_reseive["shower"].as<int>());
       is_shower_ready = true;
-      return;
+      return true;
     }
   }
+  return false;
 }
 
 void loop() {
