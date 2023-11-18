@@ -5,6 +5,7 @@
 #define pump_pin 7         // pump pin
 #define heater_pin 5       // heater pin
 #define thermo_pin 15      // thermo pin
+#define mixer_pin 3        // mixer pin
 
 #define error_pin 13  // error pin
 
@@ -14,11 +15,12 @@ MicroDS18B20<thermo_pin> sensor;
 
 // set some variables
 int temp;
-int low_temp = 37;
-int high_temp = 40;
+int low_temp = 36;
+int high_temp = 39;
 
 boolean is_pump_available = true;
 boolean is_heater_available = true;
+boolean is_mixer_available = true;
 boolean is_temp_sensor_ok = false;
 
 boolean is_force_fill_tank_ready = false;
@@ -34,9 +36,13 @@ unsigned long auto_fill_timer = auto_fill_period * 2ul;  // for filling the tank
 unsigned long serial_interval = 1000;  // 1 sec
 unsigned long serial_timer = 0;
 
-const size_t send_capacity = JSON_OBJECT_SIZE(20);
+unsigned long mix_on_period = 60000ul;    // 1 min
+unsigned long mix_off_period = 300000ul;  // 5 min
+unsigned long mix_timer = 0;
+
+const size_t send_capacity = JSON_OBJECT_SIZE(25);
 DynamicJsonDocument data_for_send(send_capacity);
-const size_t receive_capacity = JSON_OBJECT_SIZE(15);
+const size_t receive_capacity = JSON_OBJECT_SIZE(25);
 DynamicJsonDocument data_for_reseive(receive_capacity);
 
 void setup() {
@@ -46,12 +52,14 @@ void setup() {
   // initialization relay
   pinMode(pump_pin, OUTPUT);
   pinMode(heater_pin, OUTPUT);
+  pinMode(mixer_pin, OUTPUT);
 
   // init build-in LED
   pinMode(error_pin, OUTPUT);
   // relay force off
   digitalWrite(pump_pin, LOW);
   digitalWrite(heater_pin, LOW);
+  digitalWrite(mixer_pin, HIGH);  // low-level relay !!!
 
   Serial.begin(115200);
 
@@ -66,6 +74,28 @@ boolean is_time_to_fill() {
   return (((millis() - auto_fill_timer) >= auto_fill_period) || !float_low);
 }
 
+void mix_water(boolean forced = false) {
+  if (!float_low) {
+    digitalWrite(mixer_pin, HIGH);
+    return;
+  }
+  if (forced) {
+    digitalWrite(mixer_pin, LOW);
+    return;
+  }
+  if (digitalRead(!mixer_pin)) {
+    if ((millis() - mix_timer) >= mix_on_period) {
+        digitalWrite(mixer_pin, HIGH);
+        mix_timer = millis();
+      }
+  } else {
+    if ((millis() - mix_timer) >= mix_off_period) {
+        digitalWrite(mixer_pin, LOW);
+        mix_timer = millis();
+      }
+  }
+}
+
 void fill_tank() {
   digitalWrite(heater_pin, LOW);  // turn heater off just in case
   while (!float_high && is_pump_available) {
@@ -73,6 +103,7 @@ void fill_tank() {
     digitalWrite(pump_pin, HIGH);  // keep pump running
     send_data();
     receive_data();
+    mix_water(true);
   }
   digitalWrite(pump_pin, LOW);  // turn pump off
   auto_fill_timer = millis();   // update timer
@@ -84,6 +115,7 @@ void heat_water(int target_temp = high_temp) {
     read_sensors();
     send_data();
     if (receive_data()) break;
+    mix_water(true);
     if (is_time_to_fill()) {
       digitalWrite(heater_pin, LOW);  // turn heater off if water level LOW
       return;                         // break heating ???
@@ -125,8 +157,10 @@ void send_data() {
     data_for_send["is_temp_sensor_ok"] = is_temp_sensor_ok;
     data_for_send["is_pump_available"] = is_pump_available;
     data_for_send["is_heater_available"] = is_heater_available;
+    data_for_send["is_mixer_available"] = is_mixer_available;
     data_for_send["pump_state"] = digitalRead(pump_pin);
     data_for_send["heater_state"] = digitalRead(heater_pin);
+    data_for_send["mixer_state"] = digitalRead(mixer_pin);
     if (is_force_fill_tank_ready) {
       data_for_send["is_force_fill_tank_ready"] = is_force_fill_tank_ready;
       is_force_fill_tank_ready = false;
@@ -153,6 +187,7 @@ boolean receive_data() {
     high_temp = data_for_reseive.containsKey("high_temp") ? data_for_reseive["high_temp"] : high_temp;
     is_pump_available = data_for_reseive.containsKey("is_pump_available") ? data_for_reseive["is_pump_available"] : is_pump_available;
     is_heater_available = data_for_reseive.containsKey("is_heater_available") ? data_for_reseive["is_heater_available"] : is_heater_available;
+    is_mixer_available = data_for_reseive.containsKey("is_mixer_available") ? data_for_reseive["is_mixer_available"] : is_mixer_available;
 
     if (data_for_reseive.containsKey("force_fill_tank")) {
       fill_tank();

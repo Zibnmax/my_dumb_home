@@ -18,8 +18,10 @@ boolean float_high;
 boolean is_temp_sensor_ok;
 boolean is_pump_available;
 boolean is_heater_available;
+boolean is_mixer_available;
 boolean pump_state;
 boolean heater_state;
+boolean mixer_state;
 int low_temp;
 int high_temp;
 int temp;
@@ -27,9 +29,9 @@ int temp;
 String local_ip;
 const String self_name = "ESP8266 Water Tank";
 
-const size_t send_capacity = JSON_OBJECT_SIZE(20);
+const size_t send_capacity = JSON_OBJECT_SIZE(25);
 DynamicJsonDocument data_for_send_serial(send_capacity);
-const size_t receive_capacity = JSON_OBJECT_SIZE(20);
+const size_t receive_capacity = JSON_OBJECT_SIZE(25);
 DynamicJsonDocument data_for_reseive_serial(receive_capacity);
 
 DynamicJsonDocument data_for_send_http(send_capacity);
@@ -88,8 +90,10 @@ void handle_http_get() {
   data_for_send_http["is_temp_sensor_ok"] = is_temp_sensor_ok;
   data_for_send_http["is_pump_available"] = is_pump_available;
   data_for_send_http["is_heater_available"] = is_heater_available;
+  data_for_send_http["is_mixer_available"] = is_mixer_available;
   data_for_send_http["pump_state"] = pump_state;
   data_for_send_http["heater_state"] = heater_state;
+  data_for_send_http["mixer_state"] = mixer_state;
   serializeJson(data_for_send_http, json_string);
 
   web_server.send(200, "application/json", json_string);
@@ -114,8 +118,10 @@ void handle_serial_receive() {
   is_temp_sensor_ok = data_for_reseive_serial["is_temp_sensor_ok"];
   is_pump_available = data_for_reseive_serial["is_pump_available"];
   is_heater_available = data_for_reseive_serial["is_heater_available"];
+  is_mixer_available = data_for_reseive_serial["is_mixer_available"];
   pump_state = data_for_reseive_serial["pump_state"];
   heater_state = data_for_reseive_serial["heater_state"];
+  mixer_state = data_for_reseive_serial["mixer_state"];
   low_temp = data_for_reseive_serial["low_temp"];
   high_temp = data_for_reseive_serial["high_temp"];
   temp = data_for_reseive_serial["temp"];
