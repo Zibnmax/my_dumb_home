@@ -102,7 +102,7 @@ void fill_tank() {
     read_sensors();
     digitalWrite(pump_pin, HIGH);  // keep pump running
     send_data();
-    receive_data();
+    if (receive_data()) break;
     mix_water(true);
   }
   digitalWrite(pump_pin, LOW);  // turn pump off
@@ -110,16 +110,14 @@ void fill_tank() {
 }
 
 void heat_water(int target_temp = high_temp) {
+  digitalWrite(pump_pin, LOW);  // turn pump off just in case
   while (temp < target_temp && is_heater_available && is_temp_sensor_ok) {
     digitalWrite(heater_pin, HIGH);  // turn heater on
     read_sensors();
     send_data();
-    if (receive_data()) break;
     mix_water(true);
-    if (is_time_to_fill()) {
-      digitalWrite(heater_pin, LOW);  // turn heater off if water level LOW
-      return;                         // break heating ???
-    }
+    if (receive_data()) break;
+    if (is_time_to_fill()) break;
   }
   digitalWrite(heater_pin, LOW);  // turn heater off
 }
