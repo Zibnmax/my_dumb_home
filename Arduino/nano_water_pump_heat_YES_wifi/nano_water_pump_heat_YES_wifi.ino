@@ -83,7 +83,7 @@ void mix_water(boolean forced = false) {
     digitalWrite(mixer_pin, LOW);
     return;
   }
-  if (digitalRead(!mixer_pin)) {
+  if (!digitalRead(mixer_pin)) {
     if ((millis() - mix_timer) >= mix_on_period) {
         digitalWrite(mixer_pin, HIGH);
         mix_timer = millis();
@@ -158,7 +158,7 @@ void send_data() {
     data_for_send["is_mixer_available"] = is_mixer_available;
     data_for_send["pump_state"] = digitalRead(pump_pin);
     data_for_send["heater_state"] = digitalRead(heater_pin);
-    data_for_send["mixer_state"] = digitalRead(mixer_pin);
+    data_for_send["mixer_state"] = !digitalRead(mixer_pin);
     if (is_force_fill_tank_ready) {
       data_for_send["is_force_fill_tank_ready"] = is_force_fill_tank_ready;
       is_force_fill_tank_ready = false;
@@ -211,6 +211,7 @@ void loop() {
   read_sensors();
   send_data();
   receive_data();
+  mix_water();
 
   // check water level
   if (is_time_to_fill()) {
