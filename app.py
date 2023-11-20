@@ -13,25 +13,25 @@ async def main_page(request):
 
 @routes.post("/water-tank/send-data/")
 async def water_tank_read(request):
-    data = await request.query()
-    context = {
-    "name": data.get("name", ""),
-    "ip": data.get("ip", ""),
-    "wifi_connections_count": data.get("wifi_connections_count", 0),
-    "float_low": data.get("float_low", ""),
-    "float_high": data.get("float_high", ""),
-    "low_temp": data.get("low_temp", 0),
-    "high_temp": data.get("high_temp", 0),
-    "temp": data.get("temp", ""),
-    "is_temp_sensor_ok": data.get("is_temp_sensor_ok", ""),
-    "is_pump_available": data.get("is_pump_available", ""),
-    "is_heater_available": data.get("is_heater_available", ""),
-    "pump_state": data.get("pump_state", ""),
-    "heater_state": data.get("heater_state", ""),
-    "is_force_fill_tank_ready": data.get("is_force_fill_tank_ready", ""),
-    "is_force_heat_water_ready": data.get("is_force_heat_water_ready", ""),
-    "is_shower_ready": data.get("is_shower_ready", ""),
-    }
+    # data = await request.query()
+    # context = {
+    # "name": data.get("name", ""),
+    # "ip": data.get("ip", ""),
+    # "wifi_connections_count": data.get("wifi_connections_count", 0),
+    # "float_low": data.get("float_low", ""),
+    # "float_high": data.get("float_high", ""),
+    # "low_temp": data.get("low_temp", 0),
+    # "high_temp": data.get("high_temp", 0),
+    # "temp": data.get("temp", ""),
+    # "is_temp_sensor_ok": data.get("is_temp_sensor_ok", ""),
+    # "is_pump_available": data.get("is_pump_available", ""),
+    # "is_heater_available": data.get("is_heater_available", ""),
+    # "pump_state": data.get("pump_state", ""),
+    # "heater_state": data.get("heater_state", ""),
+    # "is_force_fill_tank_ready": data.get("is_force_fill_tank_ready", ""),
+    # "is_force_heat_water_ready": data.get("is_force_heat_water_ready", ""),
+    # "is_shower_ready": data.get("is_shower_ready", ""),
+    # }
     return web.Response(status=200)
 
 @aiohttp_jinja2.template("water-tank.html")
