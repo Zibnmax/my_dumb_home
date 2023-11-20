@@ -83,7 +83,7 @@ void mix_water(boolean forced = false) {
     digitalWrite(mixer_pin, LOW);
     return;
   }
-  if (digitalRead(!mixer_pin)) {
+  if (!digitalRead(mixer_pin)) {
     if ((millis() - mix_timer) >= mix_on_period) {
         digitalWrite(mixer_pin, HIGH);
         mix_timer = millis();
@@ -211,6 +211,7 @@ void loop() {
   read_sensors();
   send_data();
   receive_data();
+  mix_water();
 
   // check water level
   if (is_time_to_fill()) {
