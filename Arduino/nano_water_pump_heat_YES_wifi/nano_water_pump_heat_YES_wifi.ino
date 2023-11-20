@@ -36,9 +36,9 @@ unsigned long auto_fill_timer = auto_fill_period * 2ul;  // for filling the tank
 unsigned long serial_interval = 1000;  // 1 sec
 unsigned long serial_timer = 0;
 
-unsigned long mix_on_period = 60000ul;    // 1 min
-unsigned long mix_off_period = 300000ul;  // 5 min
-unsigned long mix_timer = 0;
+unsigned long mixer_on_period = 60000ul;    // 1 min
+unsigned long mixer_off_period = 300000ul;  // 5 min
+unsigned long mixer_timer = 0;
 
 const size_t send_capacity = JSON_OBJECT_SIZE(25);
 DynamicJsonDocument data_for_send(send_capacity);
@@ -75,7 +75,7 @@ boolean is_time_to_fill() {
 }
 
 void mix_water(boolean forced = false) {
-  if (!float_low) {
+  if (!float_low || !is_mixer_available) {
     digitalWrite(mixer_pin, HIGH);
     return;
   }
@@ -84,14 +84,14 @@ void mix_water(boolean forced = false) {
     return;
   }
   if (!digitalRead(mixer_pin)) {
-    if ((millis() - mix_timer) >= mix_on_period) {
+    if ((millis() - mixer_timer) >= mixer_on_period) {
         digitalWrite(mixer_pin, HIGH);
-        mix_timer = millis();
+        mixer_timer = millis();
       }
   } else {
-    if ((millis() - mix_timer) >= mix_off_period) {
+    if ((millis() - mixer_timer) >= mixer_off_period) {
         digitalWrite(mixer_pin, LOW);
-        mix_timer = millis();
+        mixer_timer = millis();
       }
   }
 }
@@ -99,11 +99,11 @@ void mix_water(boolean forced = false) {
 void fill_tank() {
   digitalWrite(heater_pin, LOW);  // turn heater off just in case
   while (!float_high && is_pump_available) {
-    read_sensors();
     digitalWrite(pump_pin, HIGH);  // keep pump running
+    mix_water(true);
+    read_sensors();
     send_data();
     if (receive_data()) break;
-    mix_water(true);
   }
   digitalWrite(pump_pin, LOW);  // turn pump off
   auto_fill_timer = millis();   // update timer
@@ -113,9 +113,9 @@ void heat_water(int target_temp = high_temp) {
   digitalWrite(pump_pin, LOW);  // turn pump off just in case
   while (temp < target_temp && is_heater_available && is_temp_sensor_ok) {
     digitalWrite(heater_pin, HIGH);  // turn heater on
+    mix_water(true);
     read_sensors();
     send_data();
-    mix_water(true);
     if (receive_data()) break;
     if (is_time_to_fill()) break;
   }

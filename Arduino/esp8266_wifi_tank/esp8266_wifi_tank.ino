@@ -74,6 +74,11 @@ void loop() {
   web_server.handleClient();
 
   if (Serial.available()) handle_serial_receive();
+
+  httpc.begin(wifi_client, server_address);
+  Serial.println(httpc.POST("HALLO"));
+  httpc.end();
+  delay(1000);
 }
 
 void handle_http_get() {

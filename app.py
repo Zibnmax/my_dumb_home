@@ -11,7 +11,7 @@ async def main_page(request):
     return {'title': 'Hi there'}
     # return web.Response(text="Hi there!")
 
-@routes.post("/water-tank/send-data")
+@routes.post("/water-tank/send-data/")
 async def water_tank_read(request):
     data = await request.query()
     context = {
@@ -32,7 +32,7 @@ async def water_tank_read(request):
     "is_force_heat_water_ready": data.get("is_force_heat_water_ready", ""),
     "is_shower_ready": data.get("is_shower_ready", ""),
     }
-    return web.json_response(status=200)
+    return web.Response(status=200)
 
 @aiohttp_jinja2.template("water-tank.html")
 @routes.get('/water-tank')
