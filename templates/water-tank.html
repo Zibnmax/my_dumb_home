@@ -34,6 +34,12 @@
       <span class="slider {% if heater_state %}green{% else %}red{% endif %}"></span>
     </label>
     </p>
+    <p><strong>Mixer State:</strong>
+    <label class="switch">
+        <input type="checkbox" {% if mixer_state %}checked{% endif %}>
+        <span class="slider {% if mixer_state %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
 
     <button id="toggleSpoilerButton">Show More</button>
 
@@ -52,6 +58,12 @@
         <label class="switch">
             <input type="checkbox" {% if is_heater_available %}checked{% endif %}>
             <span class="slider {% if is_heater_available %}green{% else %}red{% endif %}"></span>
+        </label>
+        </p>
+        <p><strong>Mixer Availability:</strong>
+        <label class="switch">
+            <input type="checkbox" {% if is_mixer_available %}checked{% endif %}>
+            <span class="slider {% if is_mixer_available %}green{% else %}red{% endif %}"></span>
         </label>
         </p>
     </div>

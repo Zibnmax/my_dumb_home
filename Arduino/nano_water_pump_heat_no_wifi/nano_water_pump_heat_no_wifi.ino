@@ -65,7 +65,7 @@ void fill_tank () {
 }
 
 void heat_water (int target_temp=high_temp) {
-  if (!is_heater_available) {
+  if (!is_heater_available || !is_temp_sensor_ok) {
     return;                                   // don't do anything
   }
   while (temp < target_temp) {
