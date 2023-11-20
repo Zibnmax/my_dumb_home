@@ -158,7 +158,7 @@ void send_data() {
     data_for_send["is_mixer_available"] = is_mixer_available;
     data_for_send["pump_state"] = digitalRead(pump_pin);
     data_for_send["heater_state"] = digitalRead(heater_pin);
-    data_for_send["mixer_state"] = digitalRead(mixer_pin);
+    data_for_send["mixer_state"] = !digitalRead(mixer_pin);
     if (is_force_fill_tank_ready) {
       data_for_send["is_force_fill_tank_ready"] = is_force_fill_tank_ready;
       is_force_fill_tank_ready = false;
