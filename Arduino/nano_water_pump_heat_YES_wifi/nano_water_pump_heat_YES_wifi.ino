@@ -193,12 +193,20 @@ boolean receive_data() {
       return true;
     }
     if (data_for_reseive.containsKey("force_heat_water")) {
-      heat_water(data_for_reseive["force_heat_water"].as<int>());
+      if (data_for_reseive["force_heat_water"].is<int>()) {
+        heat_water(data_for_reseive["force_heat_water"].as<int>());
+      } else {
+        heat_water();
+      }
       is_force_heat_water_ready = true;
       return true;
     }
     if (data_for_reseive.containsKey("shower")) {
-      shower(data_for_reseive["shower"].as<int>());
+      if (data_for_reseive["shower"].is<int>()) {
+        shower(data_for_reseive["shower"].as<int>());
+      } else {
+        shower();
+      }
       is_shower_ready = true;
       return true;
     }

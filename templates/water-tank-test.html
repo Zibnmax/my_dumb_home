@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <title>ESP8266 Water Tank Status Test</title>
+</head>
+<body>
+    <h1>ESP8266 Water Tank Status</h1>
+    <p><strong>Name:</strong> {{ current_readings.self_name }}</p>
+    <p><strong>IP Address:</strong> {{ current_readings.local_ip }}</p>
+    <p><strong>Wi-Fi Connections Count:</strong> {{ current_readings.wifi_connections_count }}</p>
+    <p><strong>Temperature:</strong> {{ current_readings.temp }}</p>
+    <p><strong>Float Low:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if current_readings.float_low %}checked{% endif %}>
+      <span class="slider {% if current_readings.float_low %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Float High:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if current_readings.float_high %}checked{% endif %}>
+      <span class="slider {% if current_readings.float_high %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Pump State:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if current_readings.pump_state %}checked{% endif %}>
+      <span class="slider {% if current_readings.pump_state %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Heater State:</strong>
+    <label class="switch">
+      <input type="checkbox" {% if current_readings.heater_state %}checked{% endif %}>
+      <span class="slider {% if current_readings.heater_state %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+    <p><strong>Mixer State:</strong>
+    <label class="switch">
+        <input type="checkbox" {% if current_readings.mixer_state %}checked{% endif %}>
+        <span class="slider {% if current_readings.mixer_state %}green{% else %}red{% endif %}"></span>
+    </label>
+    </p>
+
+    <button id="toggleSpoilerButton">Show More</button>
+
+    <div class="spoiler-content" id="spoiler" style="display: none;">
+        <p><strong>Low Temperature:</strong> {{ current_readings.low_temp }}</p>
+        <p><strong>High Temperature:</strong> {{ current_readings.high_temp }}</p>
+        <p><strong>Temperature Sensor Status:</strong> {{ current_readings.is_temp_sensor_ok }}</p>
+        <p><strong>Pump Availability:</strong>
+        <label class="switch">
+            <input type="checkbox" {% if current_readings.is_pump_available %}checked{% endif %}>
+            <span class="slider {% if current_readings.is_pump_available %}green{% else %}red{% endif %}"></span>
+        </label>
+        </p>
+        <p><strong>Heater Availability:</strong>
+        <label class="switch">
+            <input type="checkbox" {% if current_readings.is_heater_available %}checked{% endif %}>
+            <span class="slider {% if current_readings.is_heater_available %}green{% else %}red{% endif %}"></span>
+        </label>
+        </p>
+        <p><strong>Mixer Availability:</strong>
+        <label class="switch">
+            <input type="checkbox" {% if current_readings.is_mixer_available %}checked{% endif %}>
+            <span class="slider {% if current_readings.is_mixer_available %}green{% else %}red{% endif %}"></span>
+        </label>
+        </p>
+    </div>
+
+    <script>
+        updateData();
+        const toggleButton = document.getElementById("toggleSpoilerButton");
+        const spoiler = document.getElementById("spoiler");
+
+        toggleButton.addEventListener("click", function () {
+            if (spoiler.style.display === "none" || spoiler.style.display === "") {
+                spoiler.style.display = "block";
+                toggleButton.textContent = "Show Less";
+            } else {
+                spoiler.style.display = "none";
+                toggleButton.textContent = "Show More";
+            }
+        });
+
+        // После скрытия спойлера, вызовите функцию showAlertIfTrue
+        showAlertIfTrue(current_readings.is_force_fill_tank_ready, 'Force Fill Tank Ready');
+        showAlertIfTrue(current_readings.is_force_heat_water_ready, 'Force Heat Water Ready');
+        showAlertIfTrue(current_readings.is_shower_ready, 'Shower Ready');
+
+        
+        // Функция для показа всплывающих окон, если значение true
+        function showAlertIfTrue(value, message) {
+            if (value) {
+                alert(message);
+            }
+        }
+
+        function updateData() {
+            const keys = Object.keys(current_readings);
+            for (const key of keys) {
+                document.getElementById(key).innerText = current_readings[key];
+            }
+        }
+        setInterval(updateData, 500);
+    </script>
+</body>
+</html>

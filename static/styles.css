@@ -3,7 +3,6 @@
     display: none;
   }
 
-/* Стиль для переключателя */
 .switch {
     position: relative;
     display: inline-block;
@@ -40,17 +39,14 @@
     border-radius: 50%;
   }
   
-  /* Стиль для зеленого переключателя */
   .green {
     background-color: green;
   }
   
-  /* Стиль для красного переключателя */
   .red {
     background-color: red;
   }
   
-  /* Изменение стиля ползунка при включенном состоянии */
   .slider input:checked + .slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
