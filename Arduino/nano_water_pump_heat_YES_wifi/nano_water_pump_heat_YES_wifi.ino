@@ -27,8 +27,8 @@ boolean is_force_fill_tank_ready = false;
 boolean is_force_heat_water_ready = false;
 boolean is_shower_ready = false;
 
-boolean float_low;   // global float low state
-boolean float_high;  // global float high state
+boolean float_low;
+boolean float_high;
 
 unsigned long auto_fill_period = 60000ul * 60ul;         // 60 minutes
 unsigned long auto_fill_timer = auto_fill_period * 2ul;  // for filling the tank on launch
@@ -45,29 +45,6 @@ DynamicJsonDocument data_for_send(send_capacity);
 const size_t receive_capacity = JSON_OBJECT_SIZE(25);
 DynamicJsonDocument data_for_reseive(receive_capacity);
 
-void setup() {
-  // initialization floats
-  pinMode(float_low_pin, INPUT_PULLUP);
-  pinMode(float_high_pin, INPUT_PULLUP);
-  // initialization relay
-  pinMode(pump_pin, OUTPUT);
-  pinMode(heater_pin, OUTPUT);
-  pinMode(mixer_pin, OUTPUT);
-
-  // init build-in LED
-  pinMode(error_pin, OUTPUT);
-  // relay force off
-  digitalWrite(pump_pin, LOW);
-  digitalWrite(heater_pin, LOW);
-  digitalWrite(mixer_pin, HIGH);  // low-level relay !!!
-
-  Serial.begin(115200);
-
-  digitalWrite(error_pin, HIGH);
-  read_sensors();
-  delay(1000);  // wait 1 sec
-  digitalWrite(error_pin, LOW);
-}
 
 boolean is_time_to_fill() {
   // TRUE if timer worked OR low float is LOW
@@ -159,6 +136,7 @@ void send_data() {
     data_for_send["pump_state"] = digitalRead(pump_pin);
     data_for_send["heater_state"] = digitalRead(heater_pin);
     data_for_send["mixer_state"] = !digitalRead(mixer_pin);
+    data_for_send["time_to_fill"] = long((auto_fill_period - (millis() - auto_fill_timer)) / 1000);
     if (is_force_fill_tank_ready) {
       data_for_send["is_force_fill_tank_ready"] = is_force_fill_tank_ready;
       is_force_fill_tank_ready = false;
@@ -212,6 +190,42 @@ boolean receive_data() {
     }
   }
   return false;
+}
+
+void setup() {
+  // initialization floats
+  pinMode(float_low_pin, INPUT_PULLUP);
+  pinMode(float_high_pin, INPUT_PULLUP);
+  // initialization relay
+  pinMode(pump_pin, OUTPUT);
+  pinMode(heater_pin, OUTPUT);
+  pinMode(mixer_pin, OUTPUT);
+
+  // init build-in LED
+  pinMode(error_pin, OUTPUT);
+  // relay force off
+  digitalWrite(pump_pin, LOW);
+  digitalWrite(heater_pin, LOW);
+  digitalWrite(mixer_pin, HIGH);  // low-level relay !!!
+
+  Serial.begin(115200);
+
+  digitalWrite(error_pin, HIGH);
+  read_sensors();
+  delay(1000);  // wait 1 sec
+  digitalWrite(error_pin, LOW);
+
+  while (millis() < 60000ul) {
+    // reading all sensors
+    read_sensors();
+    send_data();
+    receive_data();
+    mix_water();
+    // check water level
+    if (is_time_to_fill()) {
+      fill_tank();
+    }
+  }
 }
 
 void loop() {
