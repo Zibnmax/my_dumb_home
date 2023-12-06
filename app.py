@@ -16,16 +16,24 @@ routes = web.RouteTableDef()
 async def main_page(request):
     return web.Response(text='Hi there')
 
+async def send_data_to_clients(data):
+    async with ClientSession() as session:
+        async with session.ws_connect('ws://192.168.1.100') as ws:
+            await ws.send_json(data)
+
 @routes.post("/water-tank/send-data/")
 async def water_tank_read(request):
-    data = await request.query()
+    # print(request)
+    data = await request.json()
+    print(data)
+    print()
     global current_readings, previous_readings
     current_readings = WaterTankReadings(**data)
     if current_readings != previous_readings:
         # TODO: write to DB
         # TODO: refresh web-page
         previous_readings = current_readings
-
+    print(current_readings)
     return web.Response(status=200)
 
 @aiohttp_jinja2.template("water-tank.html")

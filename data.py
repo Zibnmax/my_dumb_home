@@ -5,8 +5,8 @@ from typing import Optional
 @dataclass
 class WaterTankReadings:
     
-    self_name: Optional[str] = None
-    local_ip: Optional[str] = None
+    name: Optional[str] = None
+    ip: Optional[str] = None
     wifi_connections_count: Optional[int] = None
     float_low: Optional[bool] = None
     float_high: Optional[bool] = None
