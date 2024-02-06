@@ -136,7 +136,7 @@ void send_data() {
     data_for_send["pump_state"] = digitalRead(pump_pin);
     data_for_send["heater_state"] = digitalRead(heater_pin);
     data_for_send["mixer_state"] = !digitalRead(mixer_pin);
-    data_for_send["time_to_fill"] = long((auto_fill_period - (millis() - auto_fill_timer)) / 1000);
+    data_for_send["time_left_to_fill"] = long((auto_fill_period - (millis() - auto_fill_timer)) / 1000);
     if (is_force_fill_tank_ready) {
       data_for_send["is_force_fill_tank_ready"] = is_force_fill_tank_ready;
       is_force_fill_tank_ready = false;
