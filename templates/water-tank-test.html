@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width">
     <link rel="icon" href="/favicon/favicon64.png" type="image/png" sizes="64x64">
     <link rel="icon" href="/favicon/favicon32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="/favicon/favicon16.png" type="image/png" sizes="16x16">
@@ -65,12 +66,10 @@
             }
         });
 
-        // После скрытия спойлера, вызовите функцию showAlertIfTrue
         showAlertIfTrue(current_readings.is_force_fill_tank_ready, 'Force Fill Tank Ready');
         showAlertIfTrue(current_readings.is_force_heat_water_ready, 'Force Heat Water Ready');
         showAlertIfTrue(current_readings.is_shower_ready, 'Shower Ready');
 
-        // Функция для показа всплывающих окон, если значение true
         function showAlertIfTrue(value, message) {
             if (value) {
                 alert(message);
