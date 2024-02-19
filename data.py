@@ -20,6 +20,7 @@ class WaterTankReadings:
     low_temp: Optional[int] = None
     high_temp: Optional[int] = None
     temp: Optional[int] = None
+    # time_left_to_fill: Optional[int] = None
     is_force_fill_tank_ready: Optional[bool] = None
     is_force_heat_water_ready: Optional[bool] = None
     is_shower_ready: Optional[bool] = None

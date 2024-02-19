@@ -1,5 +1,7 @@
-from app import start_server
+from asyncio import run
+
+from app import start_servers
 
 
 if __name__ == "__main__":
-    start_server()
+    run(start_servers())

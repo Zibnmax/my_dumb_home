@@ -1,6 +1,9 @@
 from aiohttp import web, ClientSession
+import asyncio
 import jinja2
 import aiohttp_jinja2
+import json
+import websockets
 
 from data import WaterTankReadings
 
@@ -16,24 +19,25 @@ routes = web.RouteTableDef()
 async def main_page(request):
     return web.Response(text='Hi there')
 
-async def send_data_to_clients(data):
-    async with ClientSession() as session:
-        async with session.ws_connect('ws://192.168.1.100') as ws:
-            await ws.send_json(data)
 
 @routes.post("/water-tank/send-data/")
 async def water_tank_read(request):
     # print(request)
+    global current_readings, previous_readings, time_left_to_fill, current_readings_json, data
     data = await request.json()
-    print(data)
-    print()
-    global current_readings, previous_readings
+    time_left_to_fill = data.pop("time_left_to_fill")
+    time_left_to_fill = f"{time_left_to_fill // 60} : {(time_left_to_fill % 60):02}"
+    current_readings_json = json.dumps(data)
+    # print(data)
+    # print(time_left_to_fill)
     current_readings = WaterTankReadings(**data)
     if current_readings != previous_readings:
         # TODO: write to DB
         # TODO: refresh web-page
         previous_readings = current_readings
-    print(current_readings)
+    # print(current_readings)
+    async with websockets.connect("ws://localhost:8765") as websocket:
+        await websocket.send(current_readings_json)
     return web.Response(status=200)
 
 @aiohttp_jinja2.template("water-tank.html")
@@ -69,15 +73,25 @@ async def get_water_tank_readings(request):
 @aiohttp_jinja2.template("water-tank-test.html")
 @routes.get('/water-tank-test')
 async def water_tank_state(request):
-    context = {"current_readings": current_readings}
+    current_readings_json = json.dumps(data)
+    context = {"current_readings": current_readings, "time_left_to_fill": time_left_to_fill,
+               "current_readings_json": current_readings_json}
     return aiohttp_jinja2.render_template("water-tank-test.html", request, context)
 
-def start_server():
+
+async def websocket_handler(websocket, path):
+    pass
+
+async def start_web_server():
     app = web.Application()
     app.add_routes(routes)
     app.router.add_static('/static/', path='static', name='static')
     aiohttp_jinja2.setup(app=app, loader=jinja2.FileSystemLoader("templates"))
-    web.run_app(app, port=80)
+    await web._run_app(app, port=80)
+    
+async def start_websocket_server():
+    await websockets.serve(websocket_handler, "localhost", 8765)
+    print("WS Started")
 
-if __name__ == "__main__":
-    start_server()
+async def start_servers():
+    await asyncio.gather(start_web_server(), start_websocket_server())
